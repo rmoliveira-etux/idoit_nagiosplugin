@@ -3,10 +3,10 @@
 ## File : check_mandator_licenses.pl
 ## Author : Ricardo Oliveira @ Eurotux SA
 ## Email : rmo@eurotux.com
-## Date : 23/03/2020
+## Date : 28/01/2021
 ## ---------------------------------------------------- #
 ##
-## Plugin check for nagios / icinga
+## Plugin check for nagios / icinga, changed from Nagios::Plugin to Monitoring::Plugin
 ##
 ## License Information:
 ## This program is free software; you can redistribute it and/or modify
@@ -27,11 +27,11 @@
 package DBI;
 require DBI;
 use Getopt::Long;
-use Nagios::Plugin;
+use Monitoring::Plugin;
 
 
 $dbtype = "mysql";
-$VERSION = 1.0;
+$VERSION = 'v1.1';
 $LICENSE=<<_LIC_;
 This nagios plugin is free software, and comes with ABSOLUTELY 
 NO WARRANTY. It may be used, redistributed and/or modified under 
@@ -40,37 +40,38 @@ http://www.fsf.org/licensing/licenses/gpl.txt).
 _LIC_
 
 
-$np = Nagios::Plugin->new(  
+$np = Monitoring::Plugin->new(  
   usage => "Usage: %s [--dbserver=<host>] [--dbname=<database name> ] [--dbuser=<database user>] "
       . "[ --dbpass=<database pass> ] ",
   version => $VERSION,
   license => $LICENSE,
+  extra => "-------\nDeveloped by Eurotux Informatica SA (https://eurotux.com/)\ni-doit version 1.15.2 supported",
   blurb => "i-doit license monitoring plugin",
 );
 
 $np->add_arg(
   spec => 'dbserver=s',
-  help => '--dbserver database server hostname\n',
+  help => '--dbserver database server hostname',
   required => 1,
   default => 'localhost',
 );
 
 $np->add_arg(
   spec => 'dbname=s',
-  help => '--dbname database name (usually idoit_system)\n',
+  help => '--dbname database name (usually idoit_system)',
   required => 1,
   default => 'idoit_system',
 );
 
 $np->add_arg(
   spec => 'dbuser=s',
-  help => '--dbuser database server username (usually a read-only user)\n',
+  help => '--dbuser database server username (usually a read-only user)',
   required => 1,
 );
 
 $np->add_arg(
   spec => 'dbpass=s',
-  help => '--dbpass database server password (self-explanatory)\n',
+  help => '--dbpass database server password (self-explanatory)',
   required => 1,
 );
 
@@ -124,7 +125,7 @@ value => $MANDATORUSEDObjs{$m},
 
 
 ($code, $message) = $np->check_messages();
-$np->nagios_exit( $code, $message );
+$np->plugin_exit( $code, $message );
 
 
 
@@ -135,7 +136,7 @@ sub connectdb {
   $db = shift(@_);
   $data_source = "dbi:$dbtype:dbname=$db;host=".$np->opts->dbserver;
   $dbh = DBI->connect("$data_source", $np->opts->dbuser, $np->opts->dbpass)
-	        || $np->nagios_exit (UNKNOWN, $0);
+	        || $np->plugin_exit (UNKNOWN, $0);
 }
 	
 sub disconnectdb {
@@ -150,10 +151,10 @@ sub execsql {
     if (defined($sql_statement)) {
 		$sth->execute || &error('sql', $0); 
 	} else {
-	    $np->nagios_exit (UNKNOWN, $0);
+	    $np->plugin_exit (UNKNOWN, $0);
 	}
    } else {
-	  $np->nagios_exit (UNKNOWN, $0);
+	  $np->plugin_exit (UNKNOWN, $0);
    }
 
  return $sth;
