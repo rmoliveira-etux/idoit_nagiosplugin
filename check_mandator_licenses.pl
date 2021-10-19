@@ -31,7 +31,7 @@ use Monitoring::Plugin;
 
 
 $dbtype = "mysql";
-$VERSION = 'v1.1';
+$VERSION = "v1.2";
 $LICENSE=<<_LIC_;
 This nagios plugin is free software, and comes with ABSOLUTELY 
 NO WARRANTY. It may be used, redistributed and/or modified under 
